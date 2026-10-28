@@ -1,0 +1,5 @@
+Ash|1234567899|ash@gmail.com|Varanasi|0|11-07-2026
+Bruce Wayne|9123456780|bruce@wayneenterprises.com|Gotham City|1|20-09-2026
+Clark Kent|9012345678|clark.kent@dailyplanet.com|Metropolis|0|25-09-2026
+Sarah Connor|9876543210|sarah@cyberdyne.org|Los Angeles, CA|1|15-08-2026
+Vinay|1234567890|vinay@gmail.com|Dhanas|1|11-07-2026
