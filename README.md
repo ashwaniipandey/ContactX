@@ -1,127 +1,133 @@
-# ContactHub - Full-Stack DSA Contact Management System
+# ContactX - Full-Stack Contact Management System
 
-ContactHub is a full-stack contact management application transformed from a C++ terminal DSA program into a modern, high-performance web platform built with **Next.js 15**, **React 19**, and a custom **Vanilla CSS Glassmorphic Design System**.
+**ContactX** is an enterprise-grade full-stack contact management application transformed from a C++ terminal DSA program into a modern, distributed web platform powered by **Next.js 15 (React 19)** on the frontend, a dedicated **Express.js** REST API in the backend, and **MongoDB** for real-time indexed persistent storage.
 
-Every Data Structure and Algorithm from the original C++ implementation has been preserved, enriched, and visualized with live Big-O metrics, comparison counting, and real-time disk persistence syncing to `contacts.txt`.
+---
+
+## 🏛️ System Architecture
+
+```
+                    ┌─────────────────────────────────────────┐
+                    │          Frontend (Port 3000)           │
+                    │   Next.js 15 • React 19 • Glassmorphic  │
+                    └───────────────────┬─────────────────────┘
+                                        │ (Proxy /api/* rewrites)
+                                        ▼
+                    ┌─────────────────────────────────────────┐
+                    │          Backend (Port 5001)            │
+                    │      Node.js • Express.js • JWT         │
+                    └──────────┬──────────────────┬───────────┘
+                               │                  │
+               (Mongoose ODM)  ▼                  ▼  (File IO)
+        ┌───────────────────────────────┐   ┌───────────────────────────┐
+        │       MongoDB Database        │   │       contacts.txt        │
+        │   Collections: contacts, users│   │   Legacy C++ Pipe Sync    │
+        └───────────────────────────────┘   └───────────────────────────┘
+```
 
 ---
 
 ## 🚀 Key Features
 
-- **Authentication & User Management**:
-  - Secure Login, Registration, and **1-Click Instant Demo Login** via [`/api/auth`](file:///c:/Users/INFINIX/OneDrive/Desktop/ContactHub/src/app/api/auth/route.js).
-  - User session persistence, custom avatar initials, and quick logout.
-- **Dark & Light Mode Switcher**:
-  - Seamless theme toggle with Sun ☀️ and Moon 🌙 icons.
-  - Persistent preference stored in `localStorage` with calibrated slate/indigo color palettes for both modes.
-- **Dynamic Vector Storage (`std::vector<Contact>`)**: Implemented via `ContactVector` dynamic array featuring contiguous memory indexing, dynamic capacity expansion (2x resize), and element shifting on deletion.
-- **Search Algorithms**:
-  - `searchByName`: Case-insensitive linear search with comparison tracking ($O(N)$).
-  - `searchByPhone`: Instant phone number linear search ($O(N)$).
-  - `searchByEmail`: Case-insensitive email query ($O(N)$).
-  - Multi-field Search: Real-time debounced search scanning all fields simultaneously.
-- **Comparator Sorting ($O(N \log N)$)**:
-  - `sortByName`: Lexicographical sort (A → Z and Z → A).
-  - `sortByPhone`: Phone number comparator sort.
-  - `sortByDateAdded`: Chronological sort by date added (`DD-MM-YYYY`).
-- **Validation & Constraint Rules**:
-  - Phone validation: Exactly 10 numeric digits.
-  - Duplicate prevention: Rejects duplicate phone numbers across the dataset.
-  - Email format validation: Requires `@` and valid domain `.`.
-- **Live Disk Persistence (`contacts.txt`)**:
-  - Reads and writes the exact pipe-delimited format: `name|phone|email|address|favorite|dateAdded`.
-  - Automatically syncs between the root workspace and `ContactHub/contacts.txt` so both the C++ terminal app and web app share identical data.
-- **DSA Live HUD**:
-  - Displays real-time algorithm execution metrics, Big-O time complexity, execution duration in milliseconds, and total comparisons made.
-- **Interactive UI & Themes**:
-  - Dual view modes: **Rich Card Grid** with dynamic gradient avatars and **Dense Table View**.
-  - One-click **Favorite toggle (★)** with instant optimistic UI update.
-  - Add & Edit contact modals with real-time field validation.
-  - Delete contact modal honoring C++ prompt: `"Are you sure? (Y/N)"`.
-  - In-browser `contacts.txt` raw file inspector, editor, live downloader, and file uploader.
-  - Big-O Architecture inspector modal comparing C++ to full-stack implementation.
+### 1. 🎨 Modern Next.js Frontend
+- **Dual View Modes**: Rich interactive Card Grid and high-density Table View.
+- **Glassmorphic UI**: Calibrated dark 🌙 and light ☀️ themes with real-time toggle and localStorage persistence.
+- **User Authentication**: Secure Sign Up, Login, and 1-Click Instant Demo login with JWT.
+- **Live DSA HUD**: Real-time Big-O metrics, milliseconds execution duration, and comparison counter.
+- **Dynamic Modals**: Add contact, edit contact with 10-digit validation, deletion confirmation, and raw file editor.
+
+### 2. ⚡ Express.js REST API Backend
+- **Dedicated Service**: Clean architectural separation in `/backend`.
+- **Modular Design**: MVC structure (`config/`, `controllers/`, `models/`, `routes/`, `middleware/`).
+- **RESTful Endpoints**: Full CRUD, favorite toggling, statistics aggregation, and raw-file sync.
+- **Robust Error Handling**: Centralized JSON error middleware and CORS support.
+
+### 3. 🍃 MongoDB Database Layer
+- **Persistent Storage**: Mongoose schemas with field constraints, lowercase emails, and 10-digit regex phone validation.
+- **B-Tree Indexes**: Indexed by `name`, unique `phone`, and `email` for $O(1)$ and $O(\log N)$ retrieval.
+- **User Security**: User model with automated `bcryptjs` password hashing and JWT token generation.
+- **Auto-Seeding**: Automatically seeds default sample contacts on fresh setup.
+
+### 4. ⚙️ C++ Terminal DSA Engine (`ContactHub/`)
+- Preserves the original C++ implementation utilizing `std::vector<Contact>`, linear search algorithms, and comparator sorting.
+- Shares pipe-delimited data compatibility (`contacts.txt`) with the web application.
 
 ---
 
-## 📊 Data Structures & Complexity Reference
+## 📂 Project Directory Structure
 
-| Operation | C++ Source Function | Full-Stack Equivalent | Time Complexity | Space Complexity |
-| :--- | :--- | :--- | :--- | :--- |
-| **Add Contact** | `ContactManager::addContact` | `POST /api/contacts` | $O(1)$ amortized ($O(N)$ duplicate check) | $O(1)$ |
-| **View Contacts** | `ContactManager::viewContacts` | `GET /api/contacts` | $O(N)$ | $O(N)$ |
-| **Search by Name** | `ContactManager::searchByName` | `GET /api/contacts?q=...&field=name` | $O(N)$ | $O(1)$ |
-| **Search by Phone** | `ContactManager::searchByPhone` | `GET /api/contacts?q=...&field=phone` | $O(N)$ | $O(1)$ |
-| **Search by Email** | `ContactManager::searchByEmail` | `GET /api/contacts?q=...&field=email` | $O(N)$ | $O(1)$ |
-| **Sort by Name** | `ContactManager::sortByName` | `GET /api/contacts?sort=name` | $O(N \log N)$ | $O(\log N)$ |
-| **Sort by Phone** | `ContactManager::sortByPhone` | `GET /api/contacts?sort=phone` | $O(N \log N)$ | $O(\log N)$ |
-| **Delete Contact** | `ContactManager::deleteContact` | `DELETE /api/contacts?phone=...` | $O(N)$ search + $O(N)$ shift | $O(1)$ |
-| **Favorites** | `ContactManager::viewFavoriteContacts` | `GET /api/contacts?favorites=true` | $O(N)$ predicate filter | $O(1)$ |
-| **File Persistence** | `saveToFile()` / `loadFromFile()` | `/api/contacts/raw-file` | $O(N)$ serialization | $O(N)$ |
-
----
-
-## 📁 Project Structure
-
-```text
+```
 ContactHub/
-├── package.json                 # Next.js & React dependencies
-├── next.config.mjs              # Next.js configuration
-├── jsconfig.json                # Path alias mapping (@/* -> src/*)
-├── contacts.txt                 # Primary pipe-delimited data file
-├── src/
+├── backend/                        # Dedicated Express & MongoDB Backend
+│   ├── config/
+│   │   └── db.js                   # Mongoose database connection
+│   ├── controllers/
+│   │   ├── authController.js       # Authentication logic (JWT + bcrypt)
+│   │   └── contactController.js    # Contact CRUD & MongoDB aggregations
+│   ├── middleware/
+│   │   └── errorHandler.js         # Centralized JSON error handler
+│   ├── models/
+│   │   ├── Contact.js              # Mongoose Contact schema with validations
+│   │   └── User.js                 # Mongoose User schema with bcrypt
+│   ├── routes/
+│   │   ├── authRoutes.js           # Auth routes (/api/auth)
+│   │   ├── contactRoutes.js        # Contact routes (/api/contacts)
+│   │   └── statsRoutes.js          # Analytics routes (/api/statistics)
+│   ├── .env                        # Backend environment configuration
+│   ├── .env.example
+│   ├── package.json
+│   └── server.js                   # Express application entrypoint
+│
+├── src/                            # Frontend Next.js 15 Application
 │   ├── app/
-│   │   ├── layout.js            # Root layout & Google Fonts
-│   │   ├── globals.css          # Vanilla CSS Design System (Glassmorphism & DSA theme)
-│   │   ├── page.js              # Main application single-page dashboard
-│   │   └── api/
-│   │       ├── contacts/
-│   │       │   ├── route.js                 # GET, POST, PUT, DELETE contacts
-│   │       │   ├── toggle-favorite/route.js # Toggle favorite star
-│   │       │   ├── raw-file/route.js        # contacts.txt export & import
-│   │       │   └── reset/route.js           # Seed demo contacts
-│   │       └── statistics/route.js          # Live vector & contact statistics
-│   ├── components/
-│   │   ├── Header.js            # Brand, badges, and top actions
-│   │   ├── StatsBar.js          # Live total, favorites, capacity metrics
-│   │   ├── DsaHud.js            # Real-time Big-O and algorithm execution HUD
-│   │   ├── Toolbar.js           # Search, field filters, sort dropdown, view toggle
-│   │   ├── ContactCard.js       # Rich card with dynamic avatar and quick actions
-│   │   ├── ContactTable.js      # Dense tabular contact view
-│   │   ├── ContactModal.js      # Add/Edit form with C++ validation rules
-│   │   ├── DeleteModal.js       # Confirmation dialog matching C++
-│   │   ├── FileIoModal.js       # contacts.txt raw viewer, editor, and download
-│   │   ├── DsaArchitectureModal.js # Big-O and architecture reference table
-│   │   └── Toast.js             # Floating action notifications
-│   └── lib/
-│       └── dsa/
-│           ├── Contact.js       # Contact model mirroring Contact.h/cpp
-│           ├── ContactVector.js # Dynamic array mirroring std::vector<Contact>
-│           └── ContactManager.js# Core DSA manager mirroring ContactManager.h/cpp
-└── ContactHub/                  # Original C++ Terminal Application
-    ├── Contact.h
-    ├── Contact.cpp
-    ├── ContactManager.h
-    ├── ContactManager.cpp
-    ├── main.cpp
-    └── contacts.txt
+│   │   ├── globals.css             # Glassmorphic responsive styling
+│   │   ├── layout.js               # Metadata & root layout
+│   │   └── page.js                 # Contact dashboard & state management
+│   ├── components/                 # Modals, Cards, Table, HUD & Navigation
+│   └── lib/dsa/                    # DSA implementations & file sync logic
+│
+├── ContactHub/                     # Original C++ Terminal Application
+│   ├── Contact.h / Contact.cpp
+│   ├── ContactManager.h / .cpp
+│   ├── main.cpp
+│   └── contacts.txt
+│
+├── next.config.mjs                 # Next.js rewrites proxy to backend (Port 5001)
+├── package.json                    # Root package scripts (concurrently dev:all)
+└── contacts.txt                    # Root shared disk persistence
 ```
 
 ---
 
 ## 🖥️ How to Run
 
-### 1. Run the Full-Stack Web App
-From the root directory:
+### 1. Run Everything with One Command (Frontend + Backend)
+From the project root:
 ```bash
-# Install dependencies (already completed)
-npm install
+npm run dev:all
+```
+- **Frontend** runs on **[http://localhost:3000](http://localhost:3000)**
+- **Backend API** runs on **[http://localhost:5001/api](http://localhost:5001/api)**
+- Next.js automatically proxies all `/api/*` requests directly to Express & MongoDB!
 
-# Start development server
+### 2. Run Individually
+
+**Start Backend Only:**
+```bash
+# From root:
+npm run backend
+
+# Or inside backend directory:
+cd backend
 npm run dev
 ```
-Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
-### 2. Run the Original C++ Terminal App
+**Start Frontend Only:**
+```bash
+npm run dev
+```
+
+### 3. Run Original C++ Terminal App
 ```bash
 cd ContactHub
 g++ -std=c++11 main.cpp Contact.cpp ContactManager.cpp -o ContactHub.exe
@@ -130,17 +136,20 @@ g++ -std=c++11 main.cpp Contact.cpp ContactManager.cpp -o ContactHub.exe
 
 ---
 
-## 💾 File Format Specification (`contacts.txt`)
+## 📡 API Endpoints Reference
 
-Contacts are serialized using pipe-delimited records:
-```text
-name|phone|email|address|favorite|dateAdded
-```
-
-**Example:**
-```text
-vinay|1234567890|vinay@gmail.com|dhanas|1|11-07-2026
-ash|1234567899|ash@gmail.com|varanasi|0|11-07-2026
-Sarah Connor|9876543210|sarah@cyberdyne.org|Los Angeles|1|28-10-2026
-```
-Where `favorite` is `1` for Yes, and `0` for No.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/api/health` | Backend and MongoDB health status |
+| `POST` | `/api/auth` | Unified Auth (login / signup / demo) |
+| `POST` | `/api/auth/login` | User login (returns JWT token) |
+| `POST` | `/api/auth/register` | New user registration |
+| `GET` | `/api/contacts` | Search, filter, and sort contacts from MongoDB |
+| `POST` | `/api/contacts` | Add new contact to MongoDB (10-digit & unique check) |
+| `PUT` | `/api/contacts` | Update existing contact in MongoDB |
+| `DELETE` | `/api/contacts?phone=...` | Delete contact from MongoDB |
+| `POST` | `/api/contacts/toggle-favorite`| Toggle favorite status |
+| `POST` | `/api/contacts/reset` | Reset MongoDB to default sample dataset |
+| `GET` | `/api/contacts/raw-file` | Export contacts as pipe-delimited text |
+| `POST` | `/api/contacts/raw-file` | Synchronize raw text into MongoDB |
+| `GET` | `/api/statistics` | Aggregate database metrics and counts |

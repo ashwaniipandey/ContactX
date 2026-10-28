@@ -1,19 +1,19 @@
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 .yarn/cache
 .yarn/unplugged
 
 # testing
-/coverage
+coverage/
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
 dist/
 
 # misc
@@ -30,6 +30,7 @@ pnpm-debug.log*
 # local env files
 .env*.local
 .env
+**/.env
 
 # vercel
 .vercel
@@ -44,4 +45,3 @@ next-env.d.ts
 *.obj
 *.pdb
 *.ilk
-
