@@ -9,18 +9,52 @@ export default function FileIoModal({ isOpen, onClose, onRefreshData }) {
   const [saving, setSaving] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  const fetchRawFile = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch("/api/contacts/raw-file");
-      const text = await res.text();
-      setContent(text);
-    } catch (err) {
-      setStatusMsg("Failed to load contacts.txt");
-    } finally {
-      setLoading(false);
+  // const fetchRawFile = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const res = await fetch("/api/contacts/raw-file");
+  //     const text = await res.text();
+  //     setContent(text);
+  //   } catch (err) {
+  //     setStatusMsg("Failed to load contacts.txt");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+const fetchRawFile = async () => {
+  try {
+    setLoading(true);
+
+    const savedUser = JSON.parse(
+      localStorage.getItem("contacthub_user") || "null"
+    );
+
+    const res = await fetch(
+      "https://contactx-backend-7bbu.onrender.com/api/contacts/raw-file",
+      {
+        headers: {
+          Authorization: `Bearer ${savedUser?.token || ""}`,
+        },
+      }
+    );
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text || "Failed to load file");
     }
-  };
+
+    setContent(text);
+  } catch (err) {
+    setStatusMsg("Failed to load contacts.txt");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   useEffect(() => {
     if (isOpen) {
@@ -29,29 +63,43 @@ export default function FileIoModal({ isOpen, onClose, onRefreshData }) {
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+ if (!isOpen) return null;
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      const res = await fetch("/api/contacts/raw-file", {
+const handleSave = async () => {
+  try {
+    setSaving(true);
+
+    const savedUser = JSON.parse(
+      localStorage.getItem("contacthub_user") || "null"
+    );
+
+    const res = await fetch(
+      "https://contactx-backend-7bbu.onrender.com/api/contacts/raw-file",
+      {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${savedUser?.token || ""}`,
+          "Content-Type": "text/plain",
+        },
         body: content,
-      });
-      const data = await res.json();
-      if (data.success) {
-        setStatusMsg("✅ Saved to contacts.txt successfully!");
-        onRefreshData();
-      } else {
-        setStatusMsg(`❌ Error: ${data.error}`);
       }
-    } catch (err) {
-      setStatusMsg("Failed to save file");
-    } finally {
-      setSaving(false);
-      setTimeout(() => setStatusMsg(""), 3000);
+    );
+
+    const data = await res.json();
+
+    if (data.success) {
+      setStatusMsg("✅ Saved to contacts.txt successfully!");
+      onRefreshData();
+    } else {
+      setStatusMsg(`❌ Error: ${data.error}`);
     }
-  };
+  } catch (err) {
+    setStatusMsg("Failed to save file");
+  } finally {
+    setSaving(false);
+    setTimeout(() => setStatusMsg(""), 3000);
+  }
+};
 
   const handleDownload = () => {
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });

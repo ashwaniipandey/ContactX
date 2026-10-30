@@ -85,7 +85,7 @@ export default function Home() {
     document.documentElement.setAttribute("data-theme", nextTheme);
     try {
       localStorage.setItem("contacthub_theme", nextTheme);
-    } catch (e) {}
+    } catch (e) { }
     addToast(`Switched to ${nextTheme === "dark" ? "Dark 🌙" : "Light ☀️"} mode`, "info");
   };
 
@@ -94,7 +94,7 @@ export default function Home() {
     setUser(authenticatedUser);
     try {
       localStorage.setItem("contacthub_user", JSON.stringify(authenticatedUser));
-    } catch (e) {}
+    } catch (e) { }
     addToast(`Welcome back, ${authenticatedUser.name}!`, "success");
   };
 
@@ -102,29 +102,81 @@ export default function Home() {
     setUser(null);
     try {
       localStorage.removeItem("contacthub_user");
-    } catch (e) {}
+    } catch (e) { }
     addToast("Signed out successfully", "info");
   };
 
   // Fetch contacts from backend API (DSA logic executes efficiently in backend)
+
+  // const fetchContacts = useCallback(async () => {
+  //   try {
+  //     const params = new URLSearchParams();
+  //     if (searchQuery.trim()) {
+  //       params.append("q", searchQuery.trim());
+  //       params.append("field", searchField);
+  //     }
+  //     if (favoritesOnly) {
+  //       params.append("favorites", "true");
+  //     }
+  //     if (sortBy !== "none") {
+  //       params.append("sort", sortBy);
+  //       params.append("order", sortOrder);
+  //     }
+
+  //     // const res = await fetch(`/api/contacts?
+
+  //  const res = await fetch(`https://contactx-backend-7bbu.onrender.com/api/contacts?${params.toString()}`);
+  //     const json = await res.json();
+
+  //     if (json.success) {
+  //       setContacts(json.data || []);
+  //       if (json.stats) setStats(json.stats);
+  //     } else {
+  //       addToast(json.error || "Failed to load contacts", "error");
+  //     }
+  //   } catch (err) {
+  //     addToast("Network error connecting to API", "error");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [searchQuery, searchField, favoritesOnly, sortBy, sortOrder]);
+
+
+
   const fetchContacts = useCallback(async () => {
+    if (!user?.token) {
+      setContacts([]);
+      setStats(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const params = new URLSearchParams();
+
       if (searchQuery.trim()) {
         params.append("q", searchQuery.trim());
         params.append("field", searchField);
       }
+
       if (favoritesOnly) {
         params.append("favorites", "true");
       }
+
       if (sortBy !== "none") {
         params.append("sort", sortBy);
         params.append("order", sortOrder);
       }
 
-      // const res = await fetch(`/api/contacts?
+      const res = await fetch(
+        `https://contactx-backend-7bbu.onrender.com/api/contacts?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
 
-   const res = await fetch(`https://contactx-backend-7bbu.onrender.com/api/contacts?${params.toString()}`);
       const json = await res.json();
 
       if (json.success) {
@@ -138,7 +190,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, searchField, favoritesOnly, sortBy, sortOrder]);
+  }, [user, searchQuery, searchField, favoritesOnly, sortBy, sortOrder]);
 
   // Debounced search query & initial load
   useEffect(() => {
@@ -158,10 +210,12 @@ export default function Home() {
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+           method,headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${user.token}`,
+  },
+  body: JSON.stringify(formData),
+});
 
       const json = await res.json();
 
@@ -193,7 +247,9 @@ export default function Home() {
     try {
       const res = await fetch("/api/contacts/toggle-favorite", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           Authorization: `Bearer ${user.token}`,
+         },
         body: JSON.stringify({ phone }),
       });
       const json = await res.json();
@@ -217,9 +273,15 @@ export default function Home() {
   const handleConfirmDelete = async (phone) => {
     try {
       setIsDeleting(true);
-      const res = await fetch(`/api/contacts?phone=${encodeURIComponent(phone)}`, {
-        method: "DELETE",
-      });
+    const res = await fetch(
+  `https://contactx-backend-7bbu.onrender.com/api/contacts?phone=${encodeURIComponent(phone)}`,
+  {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${user.token}`,
+    },
+  }
+);
       const json = await res.json();
 
       if (json.success) {
@@ -310,8 +372,8 @@ export default function Home() {
             {searchQuery
               ? `No contacts match "${searchQuery}" in ${searchField}. Try a different search term.`
               : favoritesOnly
-              ? "No VIP favorite contacts marked yet. Click the star icon (★) on any contact to mark them as a VIP!"
-              : "Your contact list is currently empty. Add your first contact or load contacts from file!"}
+                ? "No VIP favorite contacts marked yet. Click the star icon (★) on any contact to mark them as a VIP!"
+                : "Your contact list is currently empty. Add your first contact or load contacts from file!"}
           </p>
 
           <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
