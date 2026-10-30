@@ -122,7 +122,9 @@ export default function Home() {
         params.append("order", sortOrder);
       }
 
-      const res = await fetch(`/api/contacts?${params.toString()}`);
+      // const res = await fetch(`/api/contacts?
+
+   const res = await fetch(`https://contactx-backend-7bbu.onrender.com/api/contacts?${params.toString()}`);
       const json = await res.json();
 
       if (json.success) {
@@ -151,7 +153,8 @@ export default function Home() {
     try {
       setIsSubmitting(true);
       const isEditing = Boolean(formData.oldPhone);
-      const endpoint = "/api/contacts";
+      const endpoint = "https://contactx-backend-7bbu.onrender.com/api/contacts";
+      // const endpoint = "/api/contacts";
       const method = isEditing ? "PUT" : "POST";
 
       const res = await fetch(endpoint, {
