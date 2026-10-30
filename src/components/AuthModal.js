@@ -19,7 +19,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth", {
+      // const res = await fetch("/api/auth", 
+      
+      const res = await fetch("https://contactx-backend-7bbu.onrender.com/api/auth",{
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
